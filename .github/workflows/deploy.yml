@@ -58,8 +58,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          Releases/Setup.exe
-          Releases/ZeroInput-*.nupkg
+          Releases/*.exe
+          Releases/*.nupkg
           Releases/RELEASES
         draft: false
         prerelease: false

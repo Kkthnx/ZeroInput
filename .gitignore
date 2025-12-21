@@ -4,3 +4,4 @@
 Releases/
 publish/
 *.user
+*.pfx

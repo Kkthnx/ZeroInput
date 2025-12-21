@@ -50,10 +50,9 @@ jobs:
 
     - name: Pack with Velopack
       run: |
-        # Note: If you have a cert, add this to the command below:
-        # --signParams "/td sha256 /fd sha256 /f ${{ steps.write_file.outputs.filePath }} /p ${{ secrets.SIGNING_CERT_PASSWORD }}"
-        
-        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput/ZeroInput.ico" --createShortcuts Desktop,StartMenu
+        # Fixed: Removed --createShortcuts (handled by App code now)
+        # Fixed: Changed icon path from "ZeroInput/ZeroInput.ico" to "ZeroInput.ico"
+        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput.ico"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1

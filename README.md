@@ -2,7 +2,7 @@
 
 **ZeroInput** is a specialized Windows utility designed to selectively block keyboard input at the kernel level. It is ideal for cleaning keyboards, preventing accidental gaming interruptions (Alt-Tab), or specific kiosk scenarios.
 
-![ZeroInput Screenshot](https://via.placeholder.com/800x450?text=App+Screenshot+Here)
+<img width="788" height="493" alt="image" src="https://github.com/user-attachments/assets/7cc56598-e1d7-41bd-8678-f1f78c17752b" />
 
 ## 🛡️ Features
 
@@ -41,7 +41,7 @@ If you accidentally block your keyboard or mouse, use the Global Toggle Hotkey t
 
 ```powershell
 # Clone the repo
-git clone [https://github.com/YourUsername/ZeroInput.git](https://github.com/YourUsername/ZeroInput.git)
+git clone [https://github.com/Kkthnx/ZeroInput.git](https://github.com/Kkthnx/ZeroInput.git)
 
 # Build and Run
 dotnet build

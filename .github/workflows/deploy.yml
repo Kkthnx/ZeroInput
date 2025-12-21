@@ -9,7 +9,7 @@ jobs:
   build-and-release:
     runs-on: windows-latest
     permissions:
-      contents: write # Required to create Releases
+      contents: write
 
     steps:
     - name: Checkout Code
@@ -24,35 +24,26 @@ jobs:
       id: get_version
       shell: pwsh
       run: |
-        # Strips the 'v' from v1.0.0 to get 1.0.0
         $version = "${{ github.ref_name }}".TrimStart('v')
         echo "VERSION=$version" >> $env:GITHUB_OUTPUT
 
     - name: Install Velopack Tool
       run: dotnet tool install -g vpk
 
+    # NEW STEP: Decode the Base64 Secret back into a file
+    - name: Decode Signing Certificate
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT_BASE64 }}")
+        [System.IO.File]::WriteAllBytes("cert.pfx", $pfx_cert_byte)
+
     - name: Publish Application
       run: |
-        dotnet publish ./ZeroInput.csproj -c Release -r win-x64 --self-contained -o ./publish
+        dotnet publish ZeroInput.csproj -c Release -r win-x64 --self-contained -o ./publish
 
-    # --- CODE SIGNING SECTION (OPTIONAL BUT RECOMMENDED) ---
-    # Un-comment the lines below if you have a certificate.
-    # 1. We decode the base64 PFX from GitHub Secrets to a temporary file
-    # - name: Decode Signing Certificate
-    #   id: write_file
-    #   uses: timheuer/base64-to-file@v1.2
-    #   with:
-    #     fileName: 'cert.pfx'
-    #     encodedString: ${{ secrets.SIGNING_CERT_BASE64 }}
-    #
-    # 2. We verify the path (debug step)
-    # - run: echo "Cert Path: ${{ steps.write_file.outputs.filePath }}"
-
-    - name: Pack with Velopack
+    - name: Pack and Sign with Velopack
       run: |
-        # Fixed: Removed --createShortcuts (handled by App code now)
-        # Fixed: Changed icon path from "ZeroInput/ZeroInput.ico" to "ZeroInput.ico"
-        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput.ico"
+        # We point to 'cert.pfx' (created in the previous step) and use the Password Secret
+        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput.ico" --signParams "/td sha256 /fd sha256 /f cert.pfx /p ${{ secrets.SIGNING_CERT_PASSWORD }}"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1

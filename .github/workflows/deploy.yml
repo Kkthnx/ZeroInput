@@ -1,0 +1,68 @@
+name: Deploy ZeroInput
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on tags like v1.0.0, v1.0.1, etc.
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write # Required to create Releases
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Get Version from Tag
+      id: get_version
+      shell: pwsh
+      run: |
+        # Strips the 'v' from v1.0.0 to get 1.0.0
+        $version = "${{ github.ref_name }}".TrimStart('v')
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+    - name: Install Velopack Tool
+      run: dotnet tool install -g vpk
+
+    - name: Publish Application
+      run: |
+        dotnet publish ./ZeroInput/ZeroInput.csproj -c Release -r win-x64 --self-contained -o ./publish
+
+    # --- CODE SIGNING SECTION (OPTIONAL BUT RECOMMENDED) ---
+    # Un-comment the lines below if you have a certificate.
+    # 1. We decode the base64 PFX from GitHub Secrets to a temporary file
+    # - name: Decode Signing Certificate
+    #   id: write_file
+    #   uses: timheuer/base64-to-file@v1.2
+    #   with:
+    #     fileName: 'cert.pfx'
+    #     encodedString: ${{ secrets.SIGNING_CERT_BASE64 }}
+    #
+    # 2. We verify the path (debug step)
+    # - run: echo "Cert Path: ${{ steps.write_file.outputs.filePath }}"
+
+    - name: Pack with Velopack
+      run: |
+        # Note: If you have a cert, add this to the command below:
+        # --signParams "/td sha256 /fd sha256 /f ${{ steps.write_file.outputs.filePath }} /p ${{ secrets.SIGNING_CERT_PASSWORD }}"
+        
+        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput/ZeroInput.ico" --createShortcuts Desktop,StartMenu
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          Releases/Setup.exe
+          Releases/ZeroInput-*.nupkg
+          Releases/RELEASES
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,7 @@ name: Deploy ZeroInput
 on:
   push:
     tags:
-      - 'v*' # Triggers on tags like v1.0.0, v1.0.1, etc.
+      - 'v*'
 
 jobs:
   build-and-release:
@@ -30,11 +30,19 @@ jobs:
     - name: Install Velopack Tool
       run: dotnet tool install -g vpk
 
-    # NEW STEP: Decode the Base64 Secret back into a file
+    # FIX 1: Use 'env' to handle the secret safely
     - name: Decode Signing Certificate
+      shell: pwsh
+      env:
+        # Maps the secret to a Windows Environment Variable
+        BASE64_CERT: ${{ secrets.SIGNING_CERT_BASE64 }} 
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.SIGNING_CERT_BASE64 }}")
-        [System.IO.File]::WriteAllBytes("cert.pfx", $pfx_cert_byte)
+        # Read from the environment variable, NOT the template string
+        $pfx_cert_byte = [System.Convert]::FromBase64String($env:BASE64_CERT)
+        
+        # Save to a known absolute path
+        $pfxPath = Join-Path -Path $env:GITHUB_WORKSPACE -ChildPath "cert.pfx"
+        [System.IO.File]::WriteAllBytes($pfxPath, $pfx_cert_byte)
 
     - name: Publish Application
       run: |
@@ -42,8 +50,8 @@ jobs:
 
     - name: Pack and Sign with Velopack
       run: |
-        # We point to 'cert.pfx' (created in the previous step) and use the Password Secret
-        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput.ico" --signParams "/td sha256 /fd sha256 /f cert.pfx /p ${{ secrets.SIGNING_CERT_PASSWORD }}"
+        # FIX 2: Use the absolute path "$env:GITHUB_WORKSPACE\cert.pfx"
+        vpk pack -u "ZeroInput" -v ${{ steps.get_version.outputs.VERSION }} -p ./publish -e "ZeroInput.exe" --icon "ZeroInput.ico" --signParams "/td sha256 /fd sha256 /f $env:GITHUB_WORKSPACE\cert.pfx /p ${{ secrets.SIGNING_CERT_PASSWORD }}"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1

@@ -101,7 +101,8 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style></TextBlock>
+                    </TextBlock.Style>
+                </TextBlock>
             </Button>
         </Grid>
 
@@ -127,11 +128,37 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
                                             <TextBlock Text="{Binding DisplayString}" VerticalAlignment="Center" Padding="5,0"/>
 
-                                            <Button Grid.Column="1" Content="✕"
+                                            <CheckBox Grid.Column="1"
+          IsChecked="{Binding IsActive}"
+          VerticalAlignment="Center"
+          Margin="10,0,15,0">
+
+                                                <CheckBox.Style>
+                                                    <Style TargetType="CheckBox">
+                                                        <Setter Property="Content" Value="Off"/>
+                                                        <Setter Property="Foreground" Value="#666666"/>
+
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter Property="Content" Value="On"/>
+                                                                <Setter Property="Foreground" Value="#00BFA5"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </CheckBox.Style>
+
+                                                <CheckBox.LayoutTransform>
+                                                    <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                                </CheckBox.LayoutTransform>
+                                            </CheckBox>
+
+                                            <Button Grid.Column="2" Content="✕"
                                                     Width="24" Height="24"
                                                     Background="Transparent"
                                                     Foreground="#666"
@@ -208,22 +235,22 @@
                                 <TextBlock Text="APPLICATION BEHAVIOR" Foreground="#888" FontWeight="Bold" FontSize="12" Margin="0,0,0,15"/>
 
                                 <CheckBox IsChecked="{Binding RunAtStartup}" Content="Run ZeroInput when Windows starts"
-                              Foreground="White" Margin="0,5" FontSize="14" Cursor="Hand">
+                                          Foreground="White" Margin="0,5" FontSize="14" Cursor="Hand">
                                     <CheckBox.LayoutTransform>
                                         <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
                                     </CheckBox.LayoutTransform>
                                 </CheckBox>
                                 <TextBlock Text="Automatically launch minimized to tray on login."
-                               Foreground="#666" FontSize="12" Margin="30,0,0,15"/>
+                                           Foreground="#666" FontSize="12" Margin="30,0,0,15"/>
 
                                 <CheckBox IsChecked="{Binding StartMinimized}" Content="Start minimized to system tray"
-                              Foreground="White" Margin="0,5" FontSize="14" Cursor="Hand">
+                                          Foreground="White" Margin="0,5" FontSize="14" Cursor="Hand">
                                     <CheckBox.LayoutTransform>
                                         <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
                                     </CheckBox.LayoutTransform>
                                 </CheckBox>
                                 <TextBlock Text="The main window will not appear when the app launches."
-                               Foreground="#666" FontSize="12" Margin="30,0,0,0"/>
+                                           Foreground="#666" FontSize="12" Margin="30,0,0,0"/>
                             </StackPanel>
                         </Border>
 
@@ -244,7 +271,7 @@
                                 </StackPanel>
 
                                 <TextBlock Grid.Row="1" Text="Pressing this combination anywhere in Windows will toggle protection ON or OFF."
-                               Foreground="#888" FontSize="12" Margin="0,0,0,20" TextWrapping="Wrap"/>
+                                           Foreground="#888" FontSize="12" Margin="0,0,0,20" TextWrapping="Wrap"/>
 
                                 <Grid Grid.Row="2">
                                     <Grid.ColumnDefinitions>
@@ -255,10 +282,10 @@
                                     <StackPanel Margin="0,0,20,0">
                                         <TextBlock Text="Trigger Key" Foreground="White" Margin="0,0,0,8"/>
                                         <ComboBox ItemsSource="{Binding AllKeys}"
-                                      SelectedItem="{Binding ToggleKey}"
-                                      Height="26" Padding="10,0"
-                                      VerticalContentAlignment="Center"
-                                      Background="#333" Foreground="Black" BorderThickness="0"/>
+                                                  SelectedItem="{Binding ToggleKey}"
+                                                  Height="26" Padding="10,0"
+                                                  VerticalContentAlignment="Center"
+                                                  Background="#333" Foreground="Black" BorderThickness="0"/>
                                     </StackPanel>
                                 </Grid>
 
